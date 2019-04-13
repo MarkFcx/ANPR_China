@@ -33,7 +33,7 @@ class mywindow(QTabWidget, Ui_MainWidget): #这个窗口继承了用QtDesignner 
         th.start()
 
     def setImage(self, image):
-        self.Video.setPixmap(QPixmap.fromImage(image))
+        self.frame.setPixmap(QPixmap.fromImage(image))
 
     def imageprocessing(self):
         print("hehe")
@@ -45,19 +45,18 @@ class mywindow(QTabWidget, Ui_MainWidget): #这个窗口继承了用QtDesignner 
 
         #利用qlabel显示图片
         print(str(imgName))
-        png = QtGui.QPixmap(imgName).scaled(self.Video.width(), self.Video.height())#适应设计label时的大小
-        self.Video.setPixmap(png)
+        png = QtGui.QPixmap(imgName).scaled(self.frame.width(), self.frame.height())#适应设计label时的大小
+        self.frame.setPixmap(png)
 
 class Thread(QThread):#采用线程来播放视频
-
     changePixmap = pyqtSignal(QtGui.QImage)
     def run(self):
         cap = cv2.VideoCapture(videoName)
         print(videoName)
         while (cap.isOpened()==True):
-            ret, frame = cap.read()
+            ret, frames = cap.read()
             if ret:
-                rgbImage = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                rgbImage = cv2.cvtColor(frames, cv2.COLOR_BGR2RGB)
                 convertToQtFormat = QtGui.QImage(rgbImage.data, rgbImage.shape[1], rgbImage.shape[0], QImage.Format_RGB888)#在这里可以对每帧图像进行处理，
                 p = convertToQtFormat.scaled(80, 80, Qt.KeepAspectRatio)
                 self.changePixmap.emit(p)

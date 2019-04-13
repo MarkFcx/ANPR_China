@@ -62,7 +62,7 @@ class Ui_MainWidget(object):
         self.StopVideoButton.setGeometry(QtCore.QRect(10, 60, 51, 31))
         self.StopVideoButton.setObjectName("StopVideoButton")
         self.Video = QtWidgets.QLabel(self.AutoCar)
-        self.Video.setGeometry(QtCore.QRect(190, 20, 160, 160))
+        self.Video.setGeometry(QtCore.QRect(90, 10, 160, 160))
         self.Video.setAlignment(QtCore.Qt.AlignCenter)
         self.Video.setObjectName("Video")
         self.ForwardButton = QtWidgets.QPushButton(self.AutoCar)
@@ -78,15 +78,20 @@ class Ui_MainWidget(object):
         self.SteerWheel.setGeometry(QtCore.QRect(226, 206, 101, 71))
         self.SteerWheel.setAlignment(QtCore.Qt.AlignCenter)
         self.SteerWheel.setObjectName("SteerWheel")
+        self.frame = QtWidgets.QFrame(self.AutoCar)
+        self.frame.setGeometry(QtCore.QRect(280, 10, 181, 171))
+        self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame.setObjectName("frame")
         self.tabWidget.addTab(self.AutoCar, "")
 
         self.retranslateUi(MainWidget)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWidget)
 
     def retranslateUi(self, MainWidget):
         _translate = QtCore.QCoreApplication.translate
-        MainWidget.setWindowTitle(_translate("MainWidget", "Queen Elsa"))
+        MainWidget.setWindowTitle(_translate("MainWidget", "Form"))
         self.OpenGateButton.setText(_translate("MainWidget", "open"))
         self.CloseGateButton.setText(_translate("MainWidget", "close"))
         self.LPVideo.setText(_translate("MainWidget", "Video"))
@@ -99,11 +104,16 @@ class Ui_MainWidget(object):
         self.LeftButton.setText(_translate("MainWidget", "L"))
         self.SteerWheel.setText(_translate("MainWidget", "方向盘"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.AutoCar), _translate("MainWidget", "AutoCar"))
+
+
+
         self.initConnect(MainWidget)
 
     def initConnect(self, MainWidget):
-        self.LoadVideoButton.clicked.connect(MainWidget.imageprocessing) 
-        self.StopVideoButton.clicked.connect(MainWidget.videoprocessing) 
+        self.LoadVideoButton.clicked.connect(MainWidget.videoprocessing)
+        self.StopVideoButton.clicked.connect(MainWidget.imageprocessing)
+
+
         self.LicensePlateInformation_0.setText("蒙")
         self.LicensePlateInformation_0.setAlignment(QtCore.Qt.AlignCenter)
         self.LicensePlateInformation_0.setStyleSheet("color:green")
