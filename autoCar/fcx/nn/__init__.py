@@ -1,1 +1,3 @@
-from .conv_1_layer import conv_1_layer
+# import the necessary packages
+from .neuralnetwork import NeuralNetwork
+from .perceptron import Perceptron
