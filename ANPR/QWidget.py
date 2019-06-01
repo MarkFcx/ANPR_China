@@ -33,6 +33,12 @@ result = namedtuple("result", ["image",
                                "char_5",
                                "char_6"])
 
+LP_Database = ["津H12035", "津MCL187", "津MSY198", "津JZT229"]
+LP_ = []
+# startTime = 0
+# endTime = 0
+
+
 class GUI(QTabWidget, Ui_MainWidget):
     def __init__(self):
         super(GUI, self).__init__()
@@ -42,12 +48,14 @@ class GUI(QTabWidget, Ui_MainWidget):
 
         self.timer_camera = QTimer()
         # self.cap = cv2.VideoCapture(0)
-        self.vs =  VideoStream(usePiCamera = 1, framerate=5).start()
+        self.vs =  VideoStream(usePiCamera = 1, framerate=10).start()
         time.sleep(2.0)
         self.OpenGateButton.clicked.connect(self.slotStart)
         self.CloseGateButton.clicked.connect(self.slotStop)
         self.timer_camera.start(100)
         self.timer_camera.timeout.connect(self.openFrame)
+        
+        
 
     def slotStart(self):
         self.ctrlG90(180)
@@ -58,7 +66,7 @@ class GUI(QTabWidget, Ui_MainWidget):
 
     def run(self, image):
 
-        charModel = pickle.loads(open("model/char.cpickle", "rb").read())
+        charModel = pickle.loads(open("model/char_2.cpickle", "rb").read())
 
         blockSizes = ((5, 5), (5, 10), (10, 5), (10, 10))
         desc = BlockBinaryPixelSum(targetSize=(30, 15), blockSizes=blockSizes)
@@ -130,21 +138,13 @@ class GUI(QTabWidget, Ui_MainWidget):
                       char_3=text[3],
                       char_4=text[4],
                       char_5=text[5],
-                      char_6=text[6])
+                      char_6=text[6]), text
 
     def openFrame(self):
-        LP = []
-        
+        self.timer_camera.start(100)
         image = self.vs.read()
-        result = self.run(image)
+        result, text = self.run(image)
         if result.provincial_capital != "无" and result.char_1 != "0":
-            LP.append((result.provincial_capital,
-                                    result.char_1,
-                                    result.char_2,
-                                    result.char_3,
-                                    result.char_4,
-                                    result.char_5,
-                                    result.char_6))
 
             self.LicensePlateInformation_0.setText(result.provincial_capital)
             self.LicensePlateInformation_0.setAlignment(QtCore.Qt.AlignCenter)
@@ -167,14 +167,49 @@ class GUI(QTabWidget, Ui_MainWidget):
             self.LicensePlateInformation_6.setText(result.char_6)
             self.LicensePlateInformation_6.setAlignment(QtCore.Qt.AlignCenter)
             self.LicensePlateInformation_6.setStyleSheet("color:red")
-
-            self.ctrlG90(180)
+            
             self.RemainingParkingSpace = self.RemainingParkingSpace - 1
+            self.LicensePlateInformation_7.setText("当前剩余车位："+str(self.RemainingParkingSpace));
+            self.LicensePlateInformation_7.setAlignment(QtCore.Qt.AlignCenter)
 
-            self.LicensePlateInformation_7.setText("当前剩余车位："+str(self.RemainingParkingSpace))
+            if any(text in string for string in LP_Database):
+                
+                self.LicensePlateInformation_8.setText("欢迎回家 请减速慢行")
+                self.LicensePlateInformation_8.setAlignment(QtCore.Qt.AlignCenter)
+                self.LicensePlateInformation_8.setStyleSheet("color:green")
+
+            elif any(text in string for string in LP_):
+                endTime = time.time()
+                fee = 0
+                feeTime = int(endTime - startTime)
+
+                if feeTime <= 3600:
+                    fee = 3
+                elif feeTime > 3600 and feeTime < 7200:
+                    fee = 6
+                self.LicensePlateInformation_8.setText("停车时间: "+ str(feeTime)+"/ 秒  支付"+str(fee)+"元")
+                self.LicensePlateInformation_8.setAlignment(QtCore.Qt.AlignCenter)
+                self.LicensePlateInformation_8.setStyleSheet("color:blue")
+            
+            else:
+                global startTime
+                startTime = time.time()
+                LP_.append(text)
+                self.LicensePlateInformation_8.setText("临时车辆  3元/小时")
+                self.LicensePlateInformation_8.setAlignment(QtCore.Qt.AlignCenter)
+                self.LicensePlateInformation_8.setStyleSheet("color:blue")
+
+            
+
+            self.ctrlG90(150)
+            
+            self.timer_camera.stop()
+
+            self.timer_camera.start(5000)
 
         else:
             self.ctrlG90(90)
+
 
         frame = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         height, width, bytesPerComponent = frame.shape
@@ -183,15 +218,17 @@ class GUI(QTabWidget, Ui_MainWidget):
                             QImage.Format_RGB888).scaled(self.LPVideo.width(), self.LPVideo.height())
         self.LPVideo.setPixmap(QPixmap.fromImage(q_image))
 
-        return LP
 
     def ctrlG90(self, angle):
         pwm = GPIO.PWM(17, 50)
         pwm.start(8)
         dutyCycle = angle/ 18. + 3.
         pwm.ChangeDutyCycle(dutyCycle)
-        time.sleep(1)
+        time.sleep(0.1)
         pwm.stop()
+
+
+
 
 
 if __name__ == '__main__':

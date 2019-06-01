@@ -39,7 +39,7 @@ class LicensePlateDetector:
         # cv2.imshow("HSV", HSV)
 
         Upper = np.array([120, 255, 255])
-        Lower = np.array([90, 127, 120])
+        Lower = np.array([90, 12, 120])
 
         H = cv2.inRange(HSV, Lower, Upper)
         # cv2.imshow("A", H)
@@ -80,10 +80,10 @@ class LicensePlateDetector:
                 rect = cv2.minAreaRect(c)
                 box = np.int0(cv2.boxPoints(rect))
 
-                if (aspectRatio > 2.4 and aspectRatio < 4) and h > self.minPlateH and w > self.minPlateW:
+                if (aspectRatio > 2.4 and aspectRatio < 4.1) and h > self.minPlateH and w > self.minPlateW:
                     regions.append(box)
 
-            # cv2.imshow("Convex Hull", hullImage)
+            # cv2.imshow("Convex Hull", hullImage.copy())
         return regions
 
     def detectCharacterCandidates(self, region):
